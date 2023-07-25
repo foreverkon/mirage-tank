@@ -1,0 +1,11 @@
+[package]
+name = "mirage-tank"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+image.workspace = true
+anyhow.workspace = true
+clap.workspace = true

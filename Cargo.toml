@@ -1,0 +1,18 @@
+[workspace]
+members = [
+    "mirage-tank-gui",
+    "mirage-tank",
+]
+default-members = ["mirage-tank-gui"]
+
+
+[workspace.dependencies]
+mirage-tank = { path = "mirage-tank" }
+slint = "1"
+slint-build = "1"
+
+image = "0.24"
+anyhow = "1.0"
+clap = { version = "4", features = ["derive"] }
+
+rfd = "0.11"

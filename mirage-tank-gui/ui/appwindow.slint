@@ -1,0 +1,237 @@
+import { Button, VerticalBox , Slider, CheckBox, GridBox} from "std-widgets.slint";
+
+export global Images  {
+    in-out property <image> wimage;
+    in-out property <image> bimage;
+    in-out property <image> oimage;
+    in-out property <length> width;
+    in-out property <length> height;
+    in property <color> obackground;
+}
+
+export component AppWindow inherits Window {
+    default-font-size: 14px;
+    preferred-width: 850px;
+    preferred-height: 700px;
+
+    callback pickWhiteImg(length ,length);
+    callback pickBlackImg(length ,length);
+    callback generate(float, float, float, float, bool, bool, bool);
+    callback save;
+
+    main := VerticalLayout {
+        spacing: 10px;
+        padding: 10px;
+
+        options := VerticalLayout {
+            spacing: 15px;
+            padding-left: 25px;
+            padding-right: 25px;
+            HorizontalLayout {
+                height: 30px;
+                spacing: 20px;
+                HorizontalLayout {
+                    alignment: start;
+                    Text {
+                        vertical-alignment: center;
+                        text: "表图: ";
+                    }
+                    btn-white-pick := Button {
+                        text: "选择本地文件";
+                        clicked => {
+                            root.pickWhiteImg(output_container.width, output_container.height);
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: start;
+                    Text {
+                        vertical-alignment: center;
+                        text: "里图: ";
+                    }
+                    btn-black-pick := Button {
+                        text: "选择本地文件";
+                        clicked => {
+                            root.pickBlackImg(output_container.width, output_container.height);
+                        }
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 20px;
+                HorizontalLayout {
+                    Text {
+                        text: "表图亮度: ";
+                    }
+                    slider-wlight := Slider {
+                        maximum: 100;
+                        value: 100;
+                    }
+                    Rectangle {
+                        width: root.default-font-size * 2;
+                        Text {
+                            horizontal-alignment: right;
+                            text: "\{Math.ceil(slider-wlight.value)}";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    Text {
+                        text: "里图亮度: ";
+                    }
+                    slider_blight := Slider {
+                        maximum: 100;
+                        value: 60;
+                    }
+                    Rectangle {
+                        width: root.default-font-size * 2;
+                        Text {
+                            horizontal-alignment: right;
+                            text: "\{Math.ceil(slider-blight.value)}";
+                        }
+                    }
+                }
+            }
+
+            HorizontalLayout {
+                spacing: 20px;
+                HorizontalLayout {
+                    Text {
+                        text: "表图色彩: ";
+                    }
+                    slider_wcolor := Slider {
+                        maximum: 100;
+                        value: 50;
+                        enabled: cbx-colorful.checked;
+                    }
+                    Rectangle {
+                        width: root.default-font-size * 2;
+                        Text {
+                            horizontal-alignment: right;
+                            text: "\{Math.ceil(slider-wcolor.value)}";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    Text {
+                        text: "里图色彩: ";
+                    }
+                    slider_bcolor := Slider {
+                        maximum: 100;
+                        value: 70;
+                        enabled: cbx-colorful.checked;
+                    }
+                    Rectangle {
+                        width: root.default-font-size * 2;
+                        Text {
+                            horizontal-alignment: right;
+                            text: "\{Math.ceil(slider-bcolor.value)}";
+                        }
+                    }
+                }
+            }
+
+
+            HorizontalLayout {
+                alignment: start;
+                spacing: 20px;
+
+                cbx_colorful := CheckBox {
+                    text: "彩色输出";
+                }
+                cbx_checkboard := CheckBox { text: "棋盘格渲染"; }
+                cbx_resize := CheckBox { text: "自动调整大小"; }
+
+
+                Button {
+                    text: "重置设置";
+                    clicked => {
+                        slider-wlight.value = 100;
+                        slider-blight.value = 60;
+                        slider-wcolor.value = 50;
+                        slider-bcolor.value = 70;
+                        cbx-checkboard.checked = false;
+                        cbx-colorful.checked = false;
+                        cbx-resize.checked = false;
+                        Images.obackground = root.background;
+                    }
+                }
+
+                Button {
+                    text: "生成";
+                    clicked => {
+                        root.generate(
+                            slider-wlight.value / 100,
+                            slider-blight.value / 100,
+                            slider-wcolor.value / 100,
+                            slider-bcolor.value / 100,
+                            cbx-resize.checked,
+                            cbx-colorful.checked,
+                            cbx-checkboard.checked
+                        )
+                    }
+                }
+
+                Button {
+                    text: "黑底预览";
+                    clicked => {
+                        Images.obackground = #000;
+                    }
+                }
+                Button {
+                    text: "白底预览";
+                    clicked => {
+                        Images.obackground = #fff;
+                    }
+                }
+                Button {
+                    text: "保存";
+                    clicked => { root.save() }
+                }
+            }
+        }
+
+        content := HorizontalLayout {
+            spacing: 10px;
+            white_container := Rectangle {width: 33%;}
+            black_container := Rectangle {width: 33%;}
+            output_container := Rectangle {
+                width: 33%;
+                Rectangle {
+                    width: Images.width;
+                    height: Images.height;
+                    background: Images.obackground;
+                }
+            }
+        }
+    }
+
+    wimage := Image {
+        source: Images.wimage;
+        x: white_container.x + content.x + main.x + (white_container.width - Images.width) / 2;
+        y: white_container.y + content.y + main.y + (white_container.height - Images.height) / 2;
+        height: Images.height;
+        width: Images.width;
+    }
+
+    bimage := Image {
+        source: Images.bimage;
+        x: black_container.x + content.x + main.x + (black_container.width - Images.width) / 2;
+        y: black_container.y + content.y + main.y + (black_container.height - Images.height) / 2;
+        height: Images.height;
+        width: Images.width;
+    }
+
+    oimage := Image {
+        source: Images.oimage;
+        x: output_container.x + content.x + main.x + (output_container.width - Images.width) / 2;
+        y: output_container.y + content.y + main.y + (output_container.height - Images.height) / 2;
+        height: Images.height;
+        width: Images.width;
+    }
+}
+
